@@ -1,0 +1,23 @@
+# Python compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+
+# Application Data & Output (Sensitive)
+data/
+output/
+nul
+
+# AI / IDE folders
+.agent/
+.claude/
+.gemini/
+.idea/
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
