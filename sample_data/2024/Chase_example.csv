@@ -1,0 +1,6 @@
+Transaction Date,Post Date,Description,Category,Type,Amount,Memo
+12/31/2023,01/01/2024,EXAMPLE COFFEE SHOP,Food & Drink,Sale,-4.50,
+01/02/2024,01/03/2024,UBER RIDE,Travel,Sale,-15.40,
+01/05/2024,01/05/2024,CHASE PAYMENT,Payment,Payment,100.00,
+01/10/2024,01/11/2024,GROCERY STORE,Groceries,Sale,-85.20,
+01/15/2024,01/15/2024,EXAMPLE AIRLINES,Travel,Sale,-250.00,

@@ -42,9 +42,11 @@ You can also open `output/spending_dashboard.html` directly as a `file://` URL. 
 YearlySpending/
 ├── analyze.py                # Main entry point - runs the full pipeline
 ├── server.py                 # Local dev server with override save API & auto-shutdown
-├── data/                     # Input: bank CSV files, organized by year
+├── data/                     # Input: bank CSV files, organized by year (ignored by git)
 │   ├── 2024/
 │   └── 2025/
+├── sample_data/              # Placeholder CSVs showing expected formats
+│   └── 2024/
 ├── output/                   # Generated output
 │   ├── spending_dashboard.html   # Interactive dashboard (open this)
 │   ├── manifest.js               # Lists available years
