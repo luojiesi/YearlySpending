@@ -42,11 +42,9 @@ You can also open `output/spending_dashboard.html` directly as a `file://` URL. 
 YearlySpending/
 ├── analyze.py                # Main entry point - runs the full pipeline
 ├── server.py                 # Local dev server with override save API & auto-shutdown
-├── convert_2024_data.py      # One-time script to convert 2024 raw data into parser-compatible CSVs
 ├── data/                     # Input: bank CSV files, organized by year
 │   ├── 2024/
-│   ├── 2025/
-│   └── Raw/                  # Original source files for 2024 conversion
+│   └── 2025/
 ├── output/                   # Generated output
 │   ├── spending_dashboard.html   # Interactive dashboard (open this)
 │   ├── manifest.js               # Lists available years
@@ -63,7 +61,7 @@ YearlySpending/
     ├── __init__.py
     ├── models.py             # Transaction dataclass
     ├── parsers.py            # Bank CSV parsers (Chase, Amex, BOA)
-    ├── rules.py              # Category rules, tax keywords, reimbursable keywords
+    ├── rules.template.py     # Template for category rules, tax keywords, reimbursable keywords
     ├── filters.py            # Internal transfer & refund detection
     └── dashboard_template.py # HTML/JS/CSS dashboard generation
 ```
@@ -232,27 +230,7 @@ Three parsers, auto-selected by filename pattern:
 | `detect_refunds` | For Chase/Amex, matches credit amounts to debit amounts within the same source, same amount, within 90 days. Closest date match wins. |
 | `apply_final_filters` | Removes internal transfers, refunds, and non-spending items. Tax transactions are kept (tagged, not removed). |
 
-## 2024 Data Conversion
 
-`convert_2024_data.py` is a one-time script that converts raw 2024 data (exported spreadsheets and BOA PDF statements) into the standard CSV format expected by the parsers.
-
-### Sources
-
-| Source file | Contents |
-|---|---|
-| `all_expenses_jan-june2024.xlsx - all_credit_cards.csv` | Jan-June 2024 credit card transactions (Chase + Amex) |
-| `all_expenses_20240701_20250607.xlsx - all.csv` | Jul 2024 - Jun 2025 all accounts |
-| `BOA_4364stmt.csv` | Jan-June 2024 BOA 4364 checking |
-| `BOA_4364_eStmt_*.pdf` | BOA 4364 monthly PDF statements |
-| `BOA_4377_eStmt_*.pdf` | BOA 4377 monthly PDF statements |
-
-### Outputs (in `data/2024/`)
-
-`Chase_9300.csv`, `Chase_7179.csv`, `Amex.csv`, `BOA_4364.csv`, `BOA_4377.csv`
-
-The script cross-verifies BOA 4377 data between PDF and CSV sources for the overlapping Jul-Dec period. PDF data is used as the primary source (covers the full year).
-
-Requires `pdfplumber` for PDF extraction: `pip install pdfplumber`.
 
 ## Adding New Data
 
@@ -297,5 +275,4 @@ Reimbursable transactions are included in data but excluded from totals by defau
 ## Dependencies
 
 - **Python 3.10+** (uses `X | Y` union type syntax)
-- **pdfplumber** — only needed for `convert_2024_data.py` (BOA PDF extraction)
 - No other external dependencies. The dashboard is pure HTML/JS/CSS with no build step.
