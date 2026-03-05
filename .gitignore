@@ -21,3 +21,8 @@ nul
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Personalized / Local files
+spending/rules.py
+convert_2024_data.py
+claude_prompt.md

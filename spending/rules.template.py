@@ -1,6 +1,10 @@
 """
 Business rules: categorization, tax exclusion, reimbursable tagging.
 These rules apply across all years.
+
+HOW TO USE THIS TEMPLATE:
+1. Rename or copy this file to `rules.py`
+2. Customize `TAX_KEYWORDS`, `CATEGORY_RULES`, and `REIMBURSABLE_KEYWORDS` to match your own bank statement descriptions.
 """
 from .models import Transaction
 
@@ -22,43 +26,34 @@ def is_tax_transaction(txn: Transaction) -> bool:
 # Each rule is a (match_function, category_name) tuple.
 # Rules are checked in order; first match wins.
 
-def _match_hoa_stjames(desc: str) -> bool:
-    return ('CITY HEIGHTS AT' in desc and 'WEB PMTS' in desc) or \
-           ('CLICKPAY' in desc and 'PROPRTYPAY' in desc)
-
-def _match_rental_mgmt(desc: str) -> bool:
-    return 'JOYHOME PROPERTY MANAGEMENT' in desc
-
-def _match_transamerica(desc: str) -> str | None:
-    """Returns specific category or None."""
-    if 'TRANSAMERICA INS' not in desc:
+def _match_special_insurance(desc: str) -> str | None:
+    """Example of a dynamic category function."""
+    if 'SOME_INSURANCE' not in desc:
         return None
     try:
         parts = desc.split('INDN:')
         if len(parts) > 1:
             name_part = parts[1].split('CO ID')[0].strip()
-            if 'XIN' in name_part:
-                return 'Long Term Insurance - Xin'
-            elif 'JIESI' in name_part:
-                return 'Long Term Insurance - Jiesi'
+            if 'USER1' in name_part:
+                return 'Insurance - User 1'
+            elif 'USER2' in name_part:
+                return 'Insurance - User 2'
     except Exception:
         pass
-    return 'Long Term Insurance'
+    return 'Insurance'
 
 
 CATEGORY_RULES = [
     # (match_fn(desc_upper) -> bool/str, category_name or None if fn returns str)
-    (lambda d: _match_hoa_stjames(d), 'HOA - StJames'),
-    (lambda d: _match_rental_mgmt(d), 'Rental Management Fee'),
-    # Transamerica is special — handled separately below
-    (lambda d: 'WF HOME MTG' in d and '27056' in d, 'Mortgage - CrystalSprings'),
-    (lambda d: 'WF HOME MTG' in d and '24997' in d, 'Mortgage - StJames'),
-    (lambda d: 'ICHA' in d and 'DES:' in d, 'Housing - 1407Cervantas'),
-    (lambda d: 'UC REGENTS BILL PAYMENT' in d, 'Daycare'),
-    (lambda d: 'MEIHUA' in d, 'Nanny'),
-    (lambda d: 'WIRE TYPE:INTL OUT' in d, 'INIT Wire'),
-    (lambda d: 'SO CAL EDISON' in d, 'Bills & Utilities'),
-    (lambda d: 'PTY TAX' in d or 'SANTA CLARA DTAC' in d or ('ALAMEDA COUNTY' in d and 'WATER' not in d), 'Property Tax'),
+    (lambda d: 'HOA PAYMENT' in d, 'HOA'),
+    (lambda d: 'RENTAL MGMT' in d, 'Rental Management Fee'),
+    # Dynamic category example:
+    (lambda d: _match_special_insurance(d) if 'SOME_INSURANCE' in d else False, None),
+    (lambda d: 'HOME MTG' in d and '12345' in d, 'Mortgage - House 1'),
+    (lambda d: 'DAYCARE' in d, 'Daycare'),
+    (lambda d: 'WIRE TYPE:INTL OUT' in d, 'Wire Transfer'),
+    (lambda d: 'ELECTRIC CO' in d, 'Bills & Utilities'),
+    (lambda d: 'PTY TAX' in d or 'COUNTY PROPERTY' in d, 'Property Tax'),
 ]
 
 
@@ -67,16 +62,12 @@ def apply_categories(transactions: list[Transaction]) -> None:
     for txn in transactions:
         desc_upper = txn.description.upper()
 
-        # Check Transamerica first (returns dynamic category)
-        trans_cat = _match_transamerica(desc_upper)
-        if trans_cat:
-            txn.category = trans_cat
-            continue
-
-        # Check static rules
+        # Check static and dynamic rules
         for match_fn, category in CATEGORY_RULES:
-            if match_fn(desc_upper):
-                txn.category = category
+            result = match_fn(desc_upper)
+            if result:
+                # If category is None, the match_fn itself returned the category string
+                txn.category = result if category is None else category
                 break
 
 
@@ -95,7 +86,7 @@ def generate_ids(transactions: list[Transaction]) -> None:
 
 
 # --- Reimbursable Keywords ---
-REIMBURSABLE_KEYWORDS = ['PROLIFIC_HW', 'ALAMEDA COUNTY WATER']
+REIMBURSABLE_KEYWORDS = ['EMPLOYER_REIMBURSEMENT', 'SOME_BILL_SPLIT']
 
 
 def tag_not_spending(transactions: list[Transaction]) -> None:

@@ -261,10 +261,19 @@ Requires `pdfplumber` for PDF extraction: `pip install pdfplumber`.
 3. Run `python analyze.py --year {year}`.
 4. Refresh the dashboard.
 
+## Setting up Business Rules (First Time Setup)
+
+Before running the tool for the first time, you need to set up your personal categorization rules:
+
+1. Copy `spending/rules.template.py` to `spending/rules.py`:
+   ```bash
+   cp spending/rules.template.py spending/rules.py
+   ```
+2. Open `spending/rules.py` and customize `TAX_KEYWORDS`, `CATEGORY_RULES`, and `REIMBURSABLE_KEYWORDS` to match your own bank statements. Your custom `rules.py` is ignored by git to keep your personal info private.
+
 ## Adding Category Rules
 
 Edit `spending/rules.py` and add entries to `CATEGORY_RULES`:
-
 ```python
 CATEGORY_RULES = [
     (lambda d: 'SOME MERCHANT' in d, 'Category Name'),
